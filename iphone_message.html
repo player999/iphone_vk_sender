@@ -1,0 +1,161 @@
+<html>
+	<head>
+		<title>Отправить сообщение с iPhone</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta charset="UTF-8">
+		<!-- Bootstrap -->
+		<link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+		<link href="http://bootsnipp.com/css/prettify.css" media="all" type="text/css" rel="stylesheet">
+		<link href="http://bootsnipp.com/css/bootsnipp.css" media="all" type="text/css" rel="stylesheet">
+		<link href="http://bootsnipp.com/css/formbuilder.css" media="all" type="text/css" rel="stylesheet">
+		<script src="//code.jquery.com/jquery-1.9.1.min.js"></script>
+		<script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+		<script src="http://bootsnipp.com/js/prettify.js"></script>
+		<script src="http://code.jquery.com/jquery.js"></script>
+		<style>
+		#message
+		{
+			resize:none;
+			width:100%;
+		}
+		#send_wrapper 
+		{  
+			font-weight:bold;
+			margin-left:auto;
+			margin-right:auto;
+			width: 400px;
+		} 
+		</style>
+		<script type="text/javascript">
+		function display_help_token(){
+		$("#token_help").html("В случае, если вы не хотите вводить сюда имя пользователя и пароль, вы можете ввести Access token от VK API, который можно получить по <a href='https://oauth.vk.com/token?grant_type=password&scope=wall&client_id=3140623&client_secret=VeWdmVclDCtn6ihuP1nt&username=ваше_имя_пользователя&password=ваш_пароль'>ссылке</a>. В адресной строке браузера просто подставьте свои имя и пароль.");
+		}
+
+		function display_help_attach(){
+			$("#attach_help").html("При необходимости вы можете приложить фото, музыку, видео, документ и т.п., введя идентификаторы нужных объектов через кому без пробелов. О том что они есть, можно посмотреть по <a href='http://vk.com/dev/wall.post'>ссылке</a>.");
+		}
+		function getCookie(c_name)
+		{
+			var c_value = document.cookie;
+			var c_start = c_value.indexOf(" " + c_name + "=");
+			if (c_start == -1)
+			{
+				c_start = c_value.indexOf(c_name + "=");
+			}
+			if (c_start == -1)
+			{
+				c_value = null;
+			}
+			else
+			{
+				c_start = c_value.indexOf("=", c_start) + 1;
+				var c_end = c_value.indexOf(";", c_start);
+				if (c_end == -1)
+				{
+					c_end = c_value.length;
+				}
+				c_value = unescape(c_value.substring(c_start,c_end));
+			}
+			return c_value;
+		}
+		function page_loaded(){
+			$('#access_token').val(getCookie('access_token'));
+		}
+		function send_message()
+		{
+			var send_data = new Object();
+			if($('#user').val() != ""){
+				send_data["user"] = $('#user').val();
+			}
+			if($('#pass').val() != ""){
+				send_data["pass"] = $('#pass').val();
+			}
+			if($('#message').val() != ""){
+				send_data["message"] = $('#message').val();
+			}
+			if($('#acess_token').val() != ""){
+				send_data["access_token"] = $('#access_token').val();
+			}
+			if($('#attachments').val() != ""){
+				send_data["attachments"] = $('#attachments').val();
+			}
+			$.post("send_iphone_message.php", send_data, function( data ) {
+				var response = eval("(" + data + ')');
+				if(data.hasOwnProperty('error')){
+					document.cookie = "";
+					$("#access_token").val("");
+					$("#notices").text("Ошибка: "+response["error"]);
+				} else {
+					$("#notices").text("Пост №" + response["response"]["post_id"] + " отправлен.");
+				}
+			});
+		}
+		</script>
+	</head>
+	<body onload="page_loaded();" background="wall.png">
+<div id="send_wrapper">
+<div id="notices"></div>
+<form id="sendform" class="form-horizontal">
+<fieldset>
+
+<!-- Form Name -->
+<legend>Отправить сообщение с iPhone</legend>
+
+<!-- Text input-->
+<div class="control-group">
+  <label class="control-label">Имя пользователя VK</label>
+  <div class="controls">
+    <input id="user" name="user" type="text" placeholder="" class="input-xlarge">
+    
+  </div>
+</div>
+
+<!-- Password input-->
+<div class="control-group">
+  <label class="control-label">Пароль</label>
+  <div class="controls">
+    <input id="pass" name="pass" type="password" placeholder="" class="input-xlarge">
+    
+  </div>
+</div>
+
+<!-- Text input-->
+<div class="control-group">
+  <label class="control-label">Access token</label>
+  <div class="controls">
+    <input id="access_token" name="access_token" type="text" placeholder="" class="input-xlarge">
+    <p id="token_help" class="help-block"><a onclick="display_help_token();">Помощь</a></p>
+  </div>
+</div>
+
+<!-- Textarea -->
+<div class="control-group">
+  <label class="control-label">Ваше сообщение</label>
+  <div class="controls">                     
+    <textarea id="message" name="message" rows=4>Введите сообщение тут...</textarea>
+  </div>
+</div>
+
+<!-- Password input-->
+<div class="control-group">
+  <label class="control-label">Приложить</label>
+  <div class="controls">
+    <input id="attachments" name="attachments" type="text" placeholder="" class="input-xlarge">
+    <p id="attach_help" class="help-block" onclick="display_help_attach();"><a>Помощь</a></p>
+  </div>
+</div>
+
+</fieldset>
+</form>
+<!-- Button -->
+<div class="control-group" align="center">
+  <label class="control-label"></label>
+  <div class="controls">
+    <button id="send_button" name="send_button" class="btn btn-primary" onclick="send_message();">Отправить</button>
+  </div>
+</div>
+
+</div>
+	</body>
+</html>
+
